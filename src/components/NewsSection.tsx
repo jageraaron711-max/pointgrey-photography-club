@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -39,7 +39,7 @@ import { useApp } from '../context/AppContext';
 import { NewsArticle, NewsCategory, GalleryImageItem } from '../types';
 
 export const NewsSection: React.FC = () => {
-  const { lang, newsArticles, likeNewsArticle, addNewsArticle, updateNewsArticle, deleteNewsArticle, currentUser } = useApp();
+  const { lang, newsArticles, likeNewsArticle, addNewsArticle, updateNewsArticle, deleteNewsArticle, currentUser, isAdmin } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeArticle, setActiveArticle] = useState<NewsArticle | null>(null);
@@ -48,6 +48,23 @@ export const NewsSection: React.FC = () => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [editorTab, setEditorTab] = useState<'zh' | 'en' | 'photos'>('zh');
+
+  // URL Hash listener to auto-open shared articles like #news-{id}
+  useEffect(() => {
+    const handleHash = () => {
+      const rawHash = window.location.hash.replace('#', '').trim();
+      if (rawHash.startsWith('news-')) {
+        const id = rawHash.replace('news-', '');
+        const matched = newsArticles.find(a => a.id === id || a.id === `news-${id}` || a.id.toLowerCase().includes(id.toLowerCase()));
+        if (matched) {
+          setActiveArticle(matched);
+        }
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [newsArticles]);
   
   // Folding / Pagination state: show 9 articles initially (3x3 grid)
   const [displayLimit, setDisplayLimit] = useState<number>(9);
@@ -133,6 +150,7 @@ export const NewsSection: React.FC = () => {
   };
 
   const handleOpenEditModal = (article: NewsArticle) => {
+    if (!isAdmin) return;
     setEditingArticleId(article.id);
     setEditorTab(lang === 'en' ? 'en' : 'zh');
     setNewReport({
@@ -163,6 +181,7 @@ export const NewsSection: React.FC = () => {
 
   // Direct Cover Photo upload handler from within reader or edit modal
   const handleDirectCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAdmin) return;
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -182,6 +201,7 @@ export const NewsSection: React.FC = () => {
   };
 
   const handleCoverFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAdmin) return;
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -317,7 +337,7 @@ export const NewsSection: React.FC = () => {
 
   // Directly insert inline image from Reader Modal
   const handleReaderInlineImagePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!activeArticle) return;
+    if (!isAdmin || !activeArticle) return;
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -344,6 +364,7 @@ export const NewsSection: React.FC = () => {
   };
 
   const handleDeleteArticle = (articleId: string) => {
+    if (!isAdmin) return;
     if (window.confirm(lang === 'zh' ? '确定要删除这篇新闻报道吗？' : 'Are you sure you want to delete this dispatch?')) {
       deleteNewsArticle(articleId);
       if (activeArticle?.id === articleId) {
@@ -354,6 +375,7 @@ export const NewsSection: React.FC = () => {
 
   const handleSaveReport = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
 
     const tagList = newReport.tags
       .split(/[,，]/)
@@ -460,45 +482,47 @@ export const NewsSection: React.FC = () => {
             </p>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => {
-                setEditingArticleId(null);
-                setEditorTab(lang === 'en' ? 'en' : 'zh');
-                setNewReport({
-                  title: '',
-                  titleZh: '',
-                  titleFr: '',
-                  author: currentUser ? currentUser.name : 'Aaron Peng',
-                  authorGrade: currentUser?.grade || 'Grade 11',
-                  authorRole: 'Sports Lead Photographer',
-                  category: 'sports',
-                  summary: '',
-                  summaryZh: '',
-                  summaryFr: '',
-                  content: '',
-                  contentZh: '',
-                  coverImage: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-                  tags: 'Sports, VancouverFC, CPL, AaronPeng',
-                  stadium: 'Willoughby Community Park Stadium (Langley, BC)',
-                  fixture: 'Vancouver FC vs Opponent',
-                  score: '3 - 1',
-                  competition: 'Canadian Premier League (CPL)',
-                  keyMoment: 'First-half high-pressure counterattack and surgical through-ball assist',
-                  keyMomentZh: '上半场高位逼抢反击与手术刀直塞助攻破门',
-                  galleryImages: []
-                });
-                setIsSubmitModalOpen(true);
-              }}
-              className="px-4 py-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-white text-xs font-mono font-medium flex items-center space-x-2 transition-colors cursor-pointer"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>
-                {lang === 'zh' ? '投稿 / 发布新特稿' : 'Submit New Dispatch'}
-              </span>
-            </button>
-          </div>
+          {/* Action buttons: Only visible to Admin */}
+          {isAdmin && (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => {
+                  setEditingArticleId(null);
+                  setEditorTab(lang === 'en' ? 'en' : 'zh');
+                  setNewReport({
+                    title: '',
+                    titleZh: '',
+                    titleFr: '',
+                    author: currentUser ? currentUser.name : 'Aaron Peng',
+                    authorGrade: currentUser?.grade || 'Grade 11',
+                    authorRole: 'Sports Lead Photographer',
+                    category: 'sports',
+                    summary: '',
+                    summaryZh: '',
+                    summaryFr: '',
+                    content: '',
+                    contentZh: '',
+                    coverImage: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
+                    tags: 'Sports, VancouverFC, CPL, AaronPeng',
+                    stadium: 'Willoughby Community Park Stadium (Langley, BC)',
+                    fixture: 'Vancouver FC vs Opponent',
+                    score: '3 - 1',
+                    competition: 'Canadian Premier League (CPL)',
+                    keyMoment: 'First-half high-pressure counterattack and surgical through-ball assist',
+                    keyMomentZh: '上半场高位逼抢反击与手术刀直塞助攻破门',
+                    galleryImages: []
+                  });
+                  setIsSubmitModalOpen(true);
+                }}
+                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs font-mono flex items-center space-x-2 transition-colors cursor-pointer border border-amber-400 shadow-xs"
+              >
+                <PlusCircle className="w-4 h-4 text-slate-950" />
+                <span>
+                  {lang === 'zh' ? '发布新特稿 (管理员)' : 'Publish Dispatch (Admin)'}
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Categories & Search Bar */}
@@ -832,23 +856,36 @@ export const NewsSection: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-1.5">
-                  <button
-                    onClick={() => quickDirectCoverInputRef.current?.click()}
-                    className="px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-mono font-medium flex items-center space-x-1.5 transition-colors cursor-pointer"
-                    title="Upload and replace real cover photo from your computer"
-                  >
-                    <Upload className="w-3.5 h-3.5 text-slate-600" />
-                    <span className="hidden sm:inline">{lang === 'zh' ? '替换封面' : 'Replace Cover'}</span>
-                  </button>
+                  {/* Admin Exclusive Editing Actions */}
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => quickDirectCoverInputRef.current?.click()}
+                        className="px-2.5 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-mono font-medium flex items-center space-x-1.5 transition-colors cursor-pointer"
+                        title="Upload and replace real cover photo from your computer (Admin)"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-amber-700" />
+                        <span className="hidden sm:inline">{lang === 'zh' ? '替换封面' : 'Replace Cover'}</span>
+                      </button>
 
-                  <button
-                    onClick={() => handleOpenEditModal(activeArticle)}
-                    className="px-2.5 py-1.5 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-mono font-medium flex items-center space-x-1.5 transition-colors cursor-pointer"
-                    title="Edit article text and photos"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-slate-600" />
-                    <span className="hidden sm:inline">{lang === 'zh' ? '编辑' : 'Edit'}</span>
-                  </button>
+                      <button
+                        onClick={() => handleOpenEditModal(activeArticle)}
+                        className="px-2.5 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-mono font-medium flex items-center space-x-1.5 transition-colors cursor-pointer"
+                        title="Edit article text and photos (Admin)"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                        <span className="hidden sm:inline">{lang === 'zh' ? '编辑' : 'Edit'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteArticle(activeArticle.id)}
+                        className="p-1.5 rounded-md bg-white hover:bg-red-50 text-slate-400 hover:text-red-600 border border-slate-200 text-xs font-mono transition-colors cursor-pointer"
+                        title="Delete article (Admin)"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  )}
 
                   <button
                     onClick={() => handleCopyShareLink(activeArticle.id)}
@@ -856,14 +893,6 @@ export const NewsSection: React.FC = () => {
                     title="Copy share link"
                   >
                     {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5" />}
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteArticle(activeArticle.id)}
-                    className="p-1.5 rounded-md bg-white hover:bg-red-50 text-slate-400 hover:text-red-600 border border-slate-200 text-xs font-mono transition-colors cursor-pointer"
-                    title="Delete article"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
 
                   <button
@@ -912,13 +941,15 @@ export const NewsSection: React.FC = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => quickDirectCoverInputRef.current?.click()}
-                        className="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-mono font-medium flex items-center space-x-1.5 transition-colors cursor-pointer"
-                      >
-                        <Camera className="w-3.5 h-3.5 text-slate-600" />
-                        <span>{lang === 'zh' ? '上传实拍照片' : 'Upload Match Photo'}</span>
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => quickDirectCoverInputRef.current?.click()}
+                          className="px-3 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-mono font-medium flex items-center space-x-1.5 transition-colors cursor-pointer"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-amber-700" />
+                          <span>{lang === 'zh' ? '上传实拍照片' : 'Upload Match Photo'}</span>
+                        </button>
+                      )}
 
                       <button
                         onClick={() => likeNewsArticle(activeArticle.id)}
@@ -1100,13 +1131,15 @@ export const NewsSection: React.FC = () => {
                           ? `摄影：${activeArticle.author} · Point Grey 摄影俱乐部` 
                           : `Photo by ${activeArticle.author} · Point Grey Photo Collective`}
                       </span>
-                      <button
-                        onClick={() => quickDirectCoverInputRef.current?.click()}
-                        className="text-xs text-slate-900 hover:underline flex items-center space-x-1 cursor-pointer"
-                      >
-                        <Camera className="w-3 h-3 text-slate-700" />
-                        <span>{lang === 'zh' ? '更换实拍封面' : 'Change Cover Photo'}</span>
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => quickDirectCoverInputRef.current?.click()}
+                          className="text-xs text-amber-800 hover:text-amber-900 font-mono font-medium flex items-center space-x-1 cursor-pointer bg-amber-50 px-2 py-0.5 rounded border border-amber-200"
+                        >
+                          <Camera className="w-3 h-3 text-amber-700" />
+                          <span>{lang === 'zh' ? '更换实拍封面 (Admin)' : 'Change Cover Photo'}</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1119,32 +1152,34 @@ export const NewsSection: React.FC = () => {
                       <span>{modalLang === 'zh' ? '特稿深度报道 // REPORT BODY' : 'REPORT BODY // DISPATCH'}</span>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="file"
-                        ref={readerInlineImageInputRef}
-                        accept="image/*"
-                        onChange={handleReaderInlineImagePicked}
-                        className="hidden"
-                      />
-                      <button
-                        onClick={() => readerInlineImageInputRef.current?.click()}
-                        className="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0047AB] text-xs font-mono font-medium flex items-center space-x-1.5 border border-blue-200 transition-colors cursor-pointer"
-                        title={modalLang === 'zh' ? '从电脑选择本地照片直接插入到正文段落之间' : 'Insert photo between text paragraphs'}
-                      >
-                        <ImagePlus className="w-3.5 h-3.5 text-[#0047AB]" />
-                        <span>{modalLang === 'zh' ? '+ 在正文间插入图片' : '+ Insert Photo in Text'}</span>
-                      </button>
+                    {isAdmin && (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="file"
+                          ref={readerInlineImageInputRef}
+                          accept="image/*"
+                          onChange={handleReaderInlineImagePicked}
+                          className="hidden"
+                        />
+                        <button
+                          onClick={() => readerInlineImageInputRef.current?.click()}
+                          className="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0047AB] text-xs font-mono font-medium flex items-center space-x-1.5 border border-blue-200 transition-colors cursor-pointer"
+                          title={modalLang === 'zh' ? '从电脑选择本地照片直接插入到正文段落之间' : 'Insert photo between text paragraphs'}
+                        >
+                          <ImagePlus className="w-3.5 h-3.5 text-[#0047AB]" />
+                          <span>{modalLang === 'zh' ? '+ 在正文间插入图片' : '+ Insert Photo in Text'}</span>
+                        </button>
 
-                      <button
-                        onClick={() => handleOpenEditModal(activeArticle)}
-                        className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-mono flex items-center space-x-1 transition-colors cursor-pointer"
-                        title="打开完整编辑器编辑段落与插图"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{modalLang === 'zh' ? '排版编辑' : 'Edit Text'}</span>
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => handleOpenEditModal(activeArticle)}
+                          className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-mono flex items-center space-x-1 transition-colors cursor-pointer"
+                          title="打开完整编辑器编辑段落与插图"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                          <span>{modalLang === 'zh' ? '排版编辑' : 'Edit Text'}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Render Markdown with custom inline image and typography styling */}
@@ -1277,74 +1312,80 @@ export const NewsSection: React.FC = () => {
                 </div>
 
                 {/* Pitchside Visual Essay Gallery (CTD Style) */}
-                <div className="space-y-4 pt-6 border-t border-slate-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-xs font-mono text-slate-900 font-bold uppercase tracking-wider">
-                      <Camera className="w-4 h-4 text-slate-700" />
-                      <span>{modalLang === 'zh' ? 'PITCHSIDE VISUAL ESSAY // 现场边线摄影组照' : 'PITCHSIDE VISUAL ESSAY // MATCH GALLERY'}</span>
+                {((activeArticle.galleryImages && activeArticle.galleryImages.length > 0) || isAdmin) && (
+                  <div className="space-y-4 pt-6 border-t border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-xs font-mono text-slate-900 font-bold uppercase tracking-wider">
+                        <Camera className="w-4 h-4 text-slate-700" />
+                        <span>{modalLang === 'zh' ? 'PITCHSIDE VISUAL ESSAY // 现场边线摄影组照' : 'PITCHSIDE VISUAL ESSAY // MATCH GALLERY'}</span>
+                      </div>
+
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleOpenEditModal(activeArticle)}
+                          className="text-xs font-mono text-amber-800 hover:text-amber-900 flex items-center space-x-1 cursor-pointer font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{modalLang === 'zh' ? '添加机位照片 (Admin)' : 'Add Photos'}</span>
+                        </button>
+                      )}
                     </div>
 
+                    {activeArticle.galleryImages && activeArticle.galleryImages.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {activeArticle.galleryImages.map((img, gIdx) => (
+                          img.url ? (
+                            <div key={gIdx} className="rounded-xl overflow-hidden bg-white border border-slate-200 space-y-2 group">
+                              <img
+                                src={img.url}
+                                alt={img.caption || 'Gallery photo'}
+                                className="w-full h-56 object-cover"
+                              />
+                              <div className="p-3 space-y-1">
+                                <p className="text-xs text-slate-800 font-medium">
+                                  {modalLang === 'zh' ? img.captionZh : img.caption}
+                                </p>
+                                {img.exif && (
+                                  <div className="text-[10px] font-mono text-slate-600 bg-slate-50 p-1.5 rounded border border-slate-200">
+                                    EXIF: {img.exif}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : null
+                        ))}
+                      </div>
+                    ) : isAdmin ? (
+                      <div className="p-6 text-center border border-dashed border-amber-300 rounded-xl bg-amber-50/50 space-y-2 font-mono">
+                        <ImageIcon className="w-5 h-5 text-amber-600 mx-auto" />
+                        <p className="text-xs text-amber-900">
+                          {modalLang === 'zh' ? '【管理员提示】暂未添加现场机位组照，点击右上角按钮添加。' : 'Admin: No pitchside gallery photos added yet.'}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                {/* Bottom Edit CTA: Exclusively for Admin */}
+                {isAdmin && (
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
+                    <div className="space-y-0.5 text-center sm:text-left">
+                      <div className="text-xs font-bold text-amber-950">
+                        {modalLang === 'zh' ? '👑 管理员：更新照片与报道文字' : '👑 Admin: Update dispatch & photographs'}
+                      </div>
+                      <div className="text-xs text-amber-800 font-sans">
+                        {modalLang === 'zh' ? '支持直接上传本地实拍原图、修改比分与中英文战报内容。' : 'Upload local photos directly and update scores & bilingual reports.'}
+                      </div>
+                    </div>
                     <button
                       onClick={() => handleOpenEditModal(activeArticle)}
-                      className="text-xs font-mono text-slate-900 hover:underline flex items-center space-x-1 cursor-pointer font-medium"
+                      className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-mono text-xs font-bold transition-colors shrink-0 cursor-pointer flex items-center space-x-1.5 border border-amber-400"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>{modalLang === 'zh' ? '添加机位照片' : 'Add Photos'}</span>
+                      <Edit3 className="w-3.5 h-3.5 text-slate-950" />
+                      <span>{modalLang === 'zh' ? '编辑报道' : 'Edit Report'}</span>
                     </button>
                   </div>
-
-                  {activeArticle.galleryImages && activeArticle.galleryImages.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {activeArticle.galleryImages.map((img, gIdx) => (
-                        img.url ? (
-                          <div key={gIdx} className="rounded-xl overflow-hidden bg-white border border-slate-200 space-y-2 group">
-                            <img
-                              src={img.url}
-                              alt={img.caption || 'Gallery photo'}
-                              className="w-full h-56 object-cover"
-                            />
-                            <div className="p-3 space-y-1">
-                              <p className="text-xs text-slate-800 font-medium">
-                                {modalLang === 'zh' ? img.captionZh : img.caption}
-                              </p>
-                              {img.exif && (
-                                <div className="text-[10px] font-mono text-slate-600 bg-slate-50 p-1.5 rounded border border-slate-200">
-                                  EXIF: {img.exif}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ) : null
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-6 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 space-y-2">
-                      <ImageIcon className="w-5 h-5 text-slate-400 mx-auto" />
-                      <p className="text-xs text-slate-500 font-mono">
-                        {modalLang === 'zh' ? '暂未添加现场机位组照，点击上方按钮上传您的实拍图片。' : 'No pitchside gallery photos added yet. Click above to upload.'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Edit CTA */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="space-y-0.5 text-center sm:text-left">
-                    <div className="text-xs font-mono font-bold text-slate-900">
-                      {modalLang === 'zh' ? '更新照片与报道文字' : 'Update dispatch & photographs'}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {modalLang === 'zh' ? '支持直接上传本地实拍原图、修改比分与中英文战报内容。' : 'Upload local photos directly and update scores & bilingual reports.'}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleOpenEditModal(activeArticle)}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-white font-mono text-xs font-medium transition-colors shrink-0 cursor-pointer flex items-center space-x-1.5"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-slate-300" />
-                    <span>{modalLang === 'zh' ? '编辑报道' : 'Edit Report'}</span>
-                  </button>
-                </div>
+                )}
 
                 {/* Tags */}
                 <div className="pt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100">
@@ -1364,9 +1405,9 @@ export const NewsSection: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* SUBMIT / EDIT REPORT MODAL WITH TABS FOR CHINESE, ENGLISH & REAL PHOTO UPLOADING */}
+      {/* SUBMIT / EDIT REPORT MODAL WITH TABS FOR CHINESE, ENGLISH & REAL PHOTO UPLOADING (Admin Only) */}
       <AnimatePresence>
-        {isSubmitModalOpen && (
+        {isAdmin && isSubmitModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-slate-950/70 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}

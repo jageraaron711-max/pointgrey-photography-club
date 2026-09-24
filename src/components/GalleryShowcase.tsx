@@ -27,9 +27,11 @@ export const GalleryShowcase: React.FC<GalleryShowcaseProps> = ({ onOpenStudentP
     likedPhotoIds, 
     toggleLikePhoto,
     externalGalleryUrl,
-    setExternalGalleryUrl
+    setExternalGalleryUrl,
+    currentUser
   } = useApp();
 
+  const isAdmin = currentUser?.role === 'curator_admin';
   const [showInPagePreview, setShowInPagePreview] = useState(false);
   const [isEditingUrl, setIsEditingUrl] = useState(false);
   const [tempUrl, setTempUrl] = useState(externalGalleryUrl || 'https://unsplash.com/t/film');
@@ -243,7 +245,7 @@ export const GalleryShowcase: React.FC<GalleryShowcaseProps> = ({ onOpenStudentP
 
                 <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {lang === 'zh'
-                    ? '汇聚 Point Grey 中学摄影俱乐部青年创作者的镜头视界，涵盖西区海岸风光、温哥华街头纪实、热血校园赛事与 214 教室手工黑白暗房银盐放制。完整 4K 高分辨率原片档案与社员独立个人专栏已整体收录展出于外部官方画廊。'
+                    ? '汇聚 Point Grey 中学摄影俱乐部青年创作者的镜头视界，涵盖西区海岸风光、温哥华街头纪实、热血校园赛事与 Ms Yelland\'s room 手工黑白暗房银盐放制。完整 4K 高分辨率原片档案与社员独立个人专栏已整体收录展出于外部官方画廊。'
                     : 'A curated anthology of student lenswork spanning coastal sunsets, campus athletics, street documentary, and 35mm darkroom silver gelatin prints. The complete collection is officially hosted on our external dedicated gallery.'}
                 </p>
               </div>
@@ -408,28 +410,30 @@ export const GalleryShowcase: React.FC<GalleryShowcaseProps> = ({ onOpenStudentP
                     {showInPagePreview ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   </button>
 
-                  {/* Edit external gallery URL */}
-                  <div className="flex items-center space-x-2">
-                    {urlSavedNotification && (
-                      <span className="text-emerald-600 font-medium flex items-center space-x-1 text-[11px]">
-                        <Check className="w-3 h-3" />
-                        <span>{lang === 'zh' ? '链接已更新' : 'Link updated'}</span>
-                      </span>
-                    )}
-                    <button
-                      onClick={() => setIsEditingUrl(!isEditingUrl)}
-                      className="inline-flex items-center space-x-1 text-slate-500 hover:text-slate-800 hover:underline cursor-pointer py-1 text-[11px]"
-                      title="Customise where 'View Gallery' links to"
-                    >
-                      <LinkIcon className="w-3 h-3 text-slate-400" />
-                      <span>{lang === 'zh' ? '修改转跳网址' : 'Edit link'}</span>
-                    </button>
-                  </div>
+                  {/* Edit external gallery URL (Strictly restricted to Admin) */}
+                  {isAdmin && (
+                    <div className="flex items-center space-x-2">
+                      {urlSavedNotification && (
+                        <span className="text-emerald-600 font-medium flex items-center space-x-1 text-[11px]">
+                          <Check className="w-3 h-3" />
+                          <span>{lang === 'zh' ? '链接已更新' : 'Link updated'}</span>
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setIsEditingUrl(!isEditingUrl)}
+                        className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer py-1 text-[11px] font-semibold"
+                        title="Admin control: Customise where 'View Gallery' links to"
+                      >
+                        <LinkIcon className="w-3 h-3" />
+                        <span>{lang === 'zh' ? '修改转跳网址' : 'Edit link'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* Inline URL Editor Dropdown with 1-Click Presets */}
+                {/* Inline URL Editor Dropdown with 1-Click Presets (Admin Only) */}
                 <AnimatePresence>
-                  {isEditingUrl && (
+                  {isAdmin && isEditingUrl && (
                     <motion.form
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}

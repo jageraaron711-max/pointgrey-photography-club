@@ -168,7 +168,7 @@ export const MaterialVault: React.FC = () => {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Free Student License · Creative Commons</span>
                 </span>
-                <span className="text-slate-500">ROOM 214 DARKROOM</span>
+                <span className="text-slate-500">MS YELLAND'S ROOM DARKROOM</span>
               </div>
             </div>
 

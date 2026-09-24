@@ -119,10 +119,10 @@ export const EventsCalendar: React.FC = () => {
             </div>
             <p className="text-slate-600 text-sm mt-2 max-w-xl font-light">
               {lang === 'zh'
-                ? '新学期常规活动、214教室传统胶片暗房实验、校际体育联赛现场拍摄及后期调色工作坊正在统筹排期与场地报备中。预约通道暂未开放，详细排期表敬请期待！'
+                ? '新学期常规活动、Ms Yelland\'s room 暗房教室传统胶片实验、校际体育联赛现场拍摄及后期调色工作坊正在统筹排期与场地报备中。预约通道暂未开放，详细排期表敬请期待！'
                 : lang === 'fr'
-                ? 'Les ateliers de chimie argentique en salle 214 et les masterclasses sont en cours de planification. Les réservations ouvriront très prochainement.'
-                : 'Room 214 darkroom chemistry sessions, sports matchday photowalks, and post-production workshops are being planned. Registrations will open soon!'}
+                ? 'Les ateliers de chimie argentique en salle Ms Yelland et les masterclasses sont en cours de planification. Les réservations ouvriront très prochainement.'
+                : 'Darkroom chemistry sessions in Ms Yelland\'s room, sports matchday photowalks, and post-production workshops are being planned. Registrations will open soon!'}
             </p>
           </div>
 

@@ -20,6 +20,7 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
     lang, 
     currentUser,
     loginUser,
+    exitAdminMode,
     submissions,
     approveSubmission,
     rejectSubmission,
@@ -111,8 +112,8 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
       setPhotoDescZh('温哥华杰里科海滩退潮时分的暮色落日，金色余晖倒映在湿润的沙滩上。');
       setPhotoTags('Vancouver, Coast, GoldenHour, Sunset');
     } else if (type === 'film') {
-      setPhotoTitle('Room 214 Chemistry Archive');
-      setPhotoTitleZh('214暗房的黑白纪实');
+      setPhotoTitle('Analog Darkroom Chemistry Archive');
+      setPhotoTitleZh('暗房手工显影的黑白纪实');
       setPhotoAuthor('Chloe Zhang');
       setPhotoGrade('Grade 12');
       setPhotoCategory('experimental');
@@ -290,26 +291,21 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
     }
   };
 
+  const ADMIN_PASSCODE = '825098';
+
   const handleAdminLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = adminPasscode.trim().toLowerCase();
-    if (
-      clean === 'pgss2026' ||
-      clean === 'pointgrey' ||
-      clean === 'pointgrey2026' ||
-      clean === '214214' ||
-      clean === 'jageraaron711@gmail.com' ||
-      clean === 'aaron'
-    ) {
-      loginUser('user-01');
+    const clean = adminPasscode.trim();
+    if (clean === ADMIN_PASSCODE) {
+      loginUser('user-01'); // Aaron Peng (curator_admin)
       setAdminError('');
       setAdminPasscode('');
-      showNotification(lang === 'zh' ? '验证通过！已登入社长管理员：Aaron Peng' : 'Verified! Logged in as Curator Admin: Aaron Peng');
+      showNotification(lang === 'zh' ? '管理权限密码验证通过！已登入社长管理员：Aaron Peng' : 'Verified! Logged in as Curator Admin: Aaron Peng');
     } else {
       setAdminError(
         lang === 'zh'
-          ? '管理员密码错误。默认口令为 pgss2026，或直接输入社长邮箱。'
-          : 'Incorrect admin passcode. Default is pgss2026 or admin email.'
+          ? '管理员密码错误，无权进入。权限密码为 825098。'
+          : 'Incorrect admin passcode. Required passcode is 825098.'
       );
     }
   };
@@ -334,7 +330,7 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
           <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
             <div className="flex items-center space-x-2.5 text-amber-400 text-xs font-bold">
               <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0" />
-              <span>POINT GREY // CURATOR ADMIN RESTRICTED</span>
+              <span>POINT GREY // ADMIN ACCESS REQUIRED</span>
             </div>
             <button
               onClick={onClose}
@@ -350,32 +346,19 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
                 <Lock className="w-7 h-7" />
               </div>
               <h3 className="text-base font-bold text-slate-900 font-sans">
-                {lang === 'zh' ? '社团管理后台 · 管理者身份验证' : 'Curator Studio · Admin Access Required'}
+                {lang === 'zh' ? '社团管理后台 · 管理员密码验证' : 'Curator Studio · Admin Authentication'}
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-sans">
                 {lang === 'zh'
-                  ? '此区域为 Point Grey 摄影俱乐部核心管理控制台，仅限社长与特展策展人（Aaron Peng · jageraaron711@gmail.com）进行社员投稿审批、特展上线与内容发布。'
-                  : 'Restricted to Club President & Curator (Aaron Peng · jageraaron711@gmail.com) for reviewing student applications and publishing exhibitions.'}
-              </p>
-            </div>
-
-            {/* Clear workflow warning */}
-            <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 space-y-1 font-sans">
-              <div className="font-bold flex items-center space-x-1.5 font-mono text-amber-800">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>{lang === 'zh' ? '社员作品参展机制提示：' : 'Notice for Students:'}</span>
-              </div>
-              <p className="text-[11.5px] text-amber-950/90 leading-relaxed">
-                {lang === 'zh' 
-                  ? '普通学生不能直接往网站画廊添加照片。学生须在社员中心提交参展申请，待社长管理员审核通过后，系统才会自动将作品公开展示于特展。' 
-                  : 'Students cannot publish photos directly to the gallery. Please submit an application through the Student Desk for curator review.'}
+                  ? '所有编辑、策展审核与内容发布权限仅开放给社团管理员（Admin）。学生不可见也不具备编辑权限。'
+                  : 'All editorial, curation, and publishing privileges are restricted exclusively to Club Administrators.'}
               </p>
             </div>
 
             <form onSubmit={handleAdminLoginSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-mono text-slate-700 font-semibold mb-1">
-                  {lang === 'zh' ? '管理员通行密码 / 邮箱验证' : 'Admin Passcode or Email'}
+                  {lang === 'zh' ? '管理员专属权限密码' : 'Admin Passcode'}
                 </label>
                 <input
                   type="password"
@@ -384,8 +367,9 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
                     setAdminPasscode(e.target.value);
                     setAdminError('');
                   }}
-                  placeholder={lang === 'zh' ? '输入管理员口令 (默认: pgss2026 或直接输入邮箱)' : 'Enter passcode (default: pgss2026 or email)'}
+                  placeholder={lang === 'zh' ? '请输入管理密码 (825098)' : 'Enter admin passcode (825098)'}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-mono text-slate-900 focus:border-[#0047AB] focus:bg-white outline-none"
+                  autoFocus
                 />
                 {adminError && (
                   <p className="text-[11px] text-rose-600 mt-1 font-mono font-medium">
@@ -399,23 +383,11 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
                 className="w-full py-2.5 rounded-xl bg-[#0047AB] hover:bg-blue-700 text-white text-xs font-mono font-bold transition-all shadow-md cursor-pointer flex items-center justify-center space-x-2"
               >
                 <ShieldCheck className="w-4 h-4 text-blue-200" />
-                <span>{lang === 'zh' ? '验证并进入管理后台' : 'Verify & Enter Curator Studio'}</span>
+                <span>{lang === 'zh' ? '验证并解锁管理员权限' : 'Verify & Unlock Admin Controls'}</span>
               </button>
             </form>
 
-            <div className="pt-2 border-t border-slate-200 space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  loginUser('user-01'); // Aaron Peng
-                  showNotification(lang === 'zh' ? '已成功切换为社长管理员：Aaron Peng' : 'Logged in as Curator Admin: Aaron Peng');
-                }}
-                className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-mono font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center space-x-2"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-                <span>{lang === 'zh' ? '⚡ 快捷验证：以社长管理员 (Aaron Peng) 登录' : '⚡ Quick Login: Aaron Peng (Curator Admin)'}</span>
-              </button>
-
+            <div className="pt-2 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => {
@@ -424,7 +396,7 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
                 }}
                 className="w-full py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-mono transition-colors cursor-pointer text-center"
               >
-                {lang === 'zh' ? '← 我是普通社员，前往社员中心提交申请' : '← Return to Student Desk to Apply'}
+                {lang === 'zh' ? '← 我是普通社员，前往社员中心提交作品' : '← Return to Student Desk to Apply'}
               </button>
             </div>
           </div>
@@ -452,7 +424,7 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
               <div className="flex items-center space-x-2">
                 <span className="text-amber-400 font-bold">PGSS PHOTO // CURATOR STUDIO</span>
                 <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] border border-amber-400/30">
-                  {lang === 'zh' ? '社长管理员: Aaron Peng' : 'CURATOR ADMIN: Aaron Peng'}
+                  {lang === 'zh' ? '社团管理员 (Admin)' : 'CURATOR ADMIN'}
                 </span>
               </div>
             </div>
@@ -461,7 +433,7 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
           <div className="flex items-center space-x-2">
             <button
               onClick={() => {
-                loginUser('user-02'); // Switch to Justin Zhang (student view)
+                exitAdminMode();
                 showNotification(lang === 'zh' ? '已退出管理模式，切换至社员视角' : 'Switched to Student mode');
               }}
               className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-mono transition-colors cursor-pointer"
@@ -1130,7 +1102,7 @@ export const CuratorStudioModal: React.FC<CuratorStudioModalProps> = ({ isOpen, 
                     type="text"
                     value={evtLocation}
                     onChange={(e) => setEvtLocation(e.target.value)}
-                    placeholder="e.g. PGSS Room 214 / Kitsilano Beach"
+                    placeholder="e.g. Ms Yelland's room / Kitsilano Beach"
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 outline-none"
                   />
                 </div>

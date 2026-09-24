@@ -51,6 +51,8 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
 
   // Login Form State
   const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPasscode, setLoginPasscode] = useState('');
+  const [needsAdminPasscode, setNeedsAdminPasscode] = useState(false);
   const [loginError, setLoginError] = useState('');
 
   // Registration Form State
@@ -180,18 +182,23 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
       return;
     }
 
-    const success = loginWithEmailOrId(loginIdentifier);
-    if (success) {
+    const result = loginWithEmailOrId(loginIdentifier, loginPasscode);
+    if (result.success) {
       setAuthMode('profile');
       setLoginIdentifier('');
+      setLoginPasscode('');
+      setNeedsAdminPasscode(false);
       showToast(lang === 'zh' ? '登录成功！' : lang === 'fr' ? 'Connexion réussie !' : 'Signed in successfully!');
+    } else if (result.requireAdminPasscode) {
+      setNeedsAdminPasscode(true);
+      setLoginError(result.message || (lang === 'zh' ? '该账号为管理员账号，请输入管理密码 (825098)。' : 'Admin password required (825098).'));
     } else {
       setLoginError(
-        lang === 'zh' 
+        result.message || (lang === 'zh' 
           ? '未找到匹配的社员账号，请核对学号/邮箱或立即注册新账号。' 
           : lang === 'fr' 
           ? 'Compte introuvable. Vérifiez l’identifiant ou créez un compte.' 
-          : 'Account not found. Please verify credentials or create a new account.'
+          : 'Account not found. Please verify credentials or create a new account.')
       );
     }
   };
@@ -311,7 +318,7 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
 
     showToast(
       lang === 'zh' 
-        ? '作品申请已成功投递！请等待管理员（Aaron Peng）审核。审核通过后将正式同步至展厅。' 
+        ? '作品申请已成功投递！审核通过后将正式同步至展厅。' 
         : lang === 'fr' 
         ? 'Photo soumise au comité des curateurs !' 
         : 'Application submitted! Awaiting administrator review.'
@@ -508,11 +515,38 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
                         type="text"
                         required
                         value={loginIdentifier}
-                        onChange={(e) => setLoginIdentifier(e.target.value)}
+                        onChange={(e) => {
+                          setLoginIdentifier(e.target.value);
+                          setNeedsAdminPasscode(false);
+                          setLoginError('');
+                        }}
                         placeholder="e.g. PG-2027-8812 or yourname@vsb.bc.ca"
                         className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs font-mono text-slate-800 outline-none focus:border-[#0047AB]"
                       />
                     </div>
+
+                    {needsAdminPasscode && (
+                      <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5 animate-fadeIn">
+                        <label className="block text-xs font-mono text-amber-900 font-bold">
+                          {lang === 'zh' ? '🔑 管理员通行密码 (825098)' : '🔑 Admin Passcode (825098)'}
+                        </label>
+                        <input
+                          type="password"
+                          required
+                          value={loginPasscode}
+                          onChange={(e) => {
+                            setLoginPasscode(e.target.value);
+                            setLoginError('');
+                          }}
+                          placeholder={lang === 'zh' ? '输入管理员密码 (825098)' : 'Enter admin passcode'}
+                          className="w-full px-3 py-2 rounded-lg bg-white border border-amber-300 text-xs font-mono text-slate-900 outline-none focus:border-[#0047AB]"
+                          autoFocus
+                        />
+                        <p className="text-[11px] text-amber-800 font-mono">
+                          {lang === 'zh' ? '※ 此账号具备管理员权限，必须输入密码 825098 方可登录' : '※ Admin role detected. Password 825098 required.'}
+                        </p>
+                      </div>
+                    )}
 
                     {loginError && (
                       <p className="text-xs text-rose-600 font-mono">{loginError}</p>
@@ -681,18 +715,10 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
                       <label className="block text-xs font-mono text-slate-700 font-semibold mb-1">
                         {lang === 'zh' ? '账号身份' : lang === 'fr' ? 'Rôle du compte' : 'Account Role'}
                       </label>
-                      <select
-                        value={regRole}
-                        onChange={(e) => setRegRole(e.target.value as UserRole)}
-                        className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-800 outline-none focus:border-[#0047AB]"
-                      >
-                        <option value="student">
-                          {lang === 'zh' ? '普通学生社员' : lang === 'fr' ? 'Membre élève' : 'Student Member'}
-                        </option>
-                        <option value="curator_admin">
-                          {lang === 'zh' ? '策展管理 / 社团干部' : lang === 'fr' ? 'Curateur / Exécutif du club' : 'Curator Admin / Club Exec'}
-                        </option>
-                      </select>
+                      <div className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-xs font-mono text-slate-700 flex items-center space-x-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                        <span className="font-semibold">{lang === 'zh' ? '普通学生社员 (Student Member)' : lang === 'fr' ? 'Membre élève' : 'Student Member'}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -1053,13 +1079,13 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
                 </div>
                 <p className="text-[11.5px] text-amber-950/90 font-sans leading-relaxed">
                   {lang === 'zh'
-                    ? '根据社团章程，社员上传的照片属于参展申请，不能直接公开添加至网站展厅。提交后将进入【社长策展审核队列】（由 Aaron Peng 审核画质与拍摄参数）。审核通过后，系统将自动录入展厅并公示展出。'
-                    : 'According to club policy, student uploads are submitted for curatorial review rather than published directly. Submissions will be vetted by the administrator (Aaron Peng) before going live on the gallery.'}
+                    ? '根据社团展出规范，社员上传的照片属于参展申请。提交后将进入审核队列，审核通过后正式录入展厅展出。'
+                    : 'According to club policy, student uploads are submitted for review rather than published directly. Submissions will be vetted before going live on the gallery.'}
                 </p>
                 <div className="flex items-center space-x-2 text-[10.5px] text-amber-800 pt-0.5 font-mono">
                   <span className="bg-amber-200/80 px-1.5 py-0.5 rounded">1. 社员在线提交</span>
                   <span>→</span>
-                  <span className="bg-amber-200/80 px-1.5 py-0.5 rounded">2. 管理者 (Aaron) 审批</span>
+                  <span className="bg-amber-200/80 px-1.5 py-0.5 rounded">2. 管理员审核</span>
                   <span>→</span>
                   <span className="bg-emerald-200/80 text-emerald-950 px-1.5 py-0.5 rounded font-bold">3. 正式陈列于画廊</span>
                 </div>
@@ -1309,7 +1335,7 @@ export const StudentPortalModal: React.FC<StudentPortalModalProps> = ({
                 >
                   <Send className="w-4 h-4" />
                   <span>
-                    {lang === 'zh' ? '提交作品申请至管理员审核 (Aaron Peng 审核)' : lang === 'fr' ? 'Soumettre pour validation' : 'Submit Application for Curator Review'}
+                    {lang === 'zh' ? '提交作品申请至管理员审核' : lang === 'fr' ? 'Soumettre pour validation' : 'Submit Application for Review'}
                   </span>
                 </button>
               </div>

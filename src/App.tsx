@@ -72,7 +72,7 @@ function MainLayout() {
         />
       </main>
 
-      {/* Footer with school info, room 214 darkroom notice, & copyright */}
+      {/* Footer with school info, meeting location & times notice, & copyright */}
       <Footer onOpenBrandKit={() => setIsBrandKitOpen(true)} />
 
       {/* Fullscreen High-Tech Photo Lightbox Modal */}

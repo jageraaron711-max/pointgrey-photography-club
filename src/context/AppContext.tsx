@@ -65,8 +65,12 @@ interface AppContextType {
   users: UserProfile[];
   submissions: PhotoSubmission[];
   loginUser: (userId: string) => void;
-  loginWithEmailOrId: (identifier: string) => boolean;
+  loginWithEmailOrId: (identifier: string, passcode?: string) => { success: boolean; requireAdminPasscode?: boolean; message?: string };
   logoutUser: () => void;
+  isAdmin: boolean;
+  adminPasscode: string;
+  verifyAndLoginAdmin: (passcode: string) => boolean;
+  exitAdminMode: () => void;
   registerUser: (userData: Omit<UserProfile, 'id' | 'joinedDate' | 'submittedPhotoCount' | 'approvedPhotoCount'>) => UserProfile;
   updateUserProfile: (data: Partial<UserProfile>) => void;
   submitPhotoForReview: (submissionData: Omit<PhotoSubmission, 'id' | 'submittedAt' | 'status'>) => void;
@@ -85,7 +89,7 @@ const STORAGE_KEYS = {
   PHOTOS: 'pgss_photo_items_v1',
   EVENTS: 'pgss_photo_events_v1',
   ANNOUNCEMENTS: 'pgss_photo_announcements_v1',
-  NEWS: 'pgss_photo_news_v1',
+  NEWS: 'pgss_photo_news_v2', // v2: clean legacy 214 and unauthorized student edits
   TUTORIALS: 'pgss_photo_tutorials_v1',
   MATERIALS: 'pgss_photo_materials_v1',
   COURSES: 'pgss_photo_courses_v1',
@@ -93,7 +97,7 @@ const STORAGE_KEYS = {
   MATERIAL_ORDERS: 'pgss_photo_mat_orders_v1',
   LIKED: 'pgss_photo_liked_ids_v1',
   USERS: 'pgss_photo_users_v1',
-  CURRENT_USER: 'pgss_photo_current_user_v1',
+  CURRENT_USER: 'pgss_photo_current_user_v2',
   SUBMISSIONS: 'pgss_photo_submissions_v1',
   EXTERNAL_GALLERY_URL: 'pgss_external_gallery_url_v1',
   EXTERNAL_VAULT_URL: 'pgss_external_vault_url_v1',
@@ -166,14 +170,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_USERS;
   });
 
+  const ADMIN_PASSCODE = '825098';
+
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.role === 'curator_admin') {
+          const verified = sessionStorage.getItem('pgss_admin_verified_825098');
+          if (verified === 'true') {
+            return parsed;
+          }
+          return INITIAL_USERS[1]; // Default to student view (Justin Zhang)
+        }
+        return parsed;
+      }
     } catch (e) {
       console.warn('Failed to parse saved current user', e);
     }
-    return INITIAL_USERS[1]; // Default to Chloe Zhang (Student view)
+    return INITIAL_USERS[1]; // Default to student view (Justin Zhang)
   });
 
   const [submissions, setSubmissions] = useState<PhotoSubmission[]>(() => {
@@ -659,15 +675,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAnnouncements((prev) => prev.filter((a) => a.id !== announcementId));
   };
 
-  // User Account Management
+  // User Account Management & Admin Access Controls (Passcode: 825098)
+  const isAdmin = currentUser?.role === 'curator_admin';
+
+  const verifyAndLoginAdmin = (passcode: string): boolean => {
+    if (passcode.trim() === ADMIN_PASSCODE) {
+      const adminUser = users.find((u) => u.role === 'curator_admin') || INITIAL_USERS[0];
+      setCurrentUser(adminUser);
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(adminUser));
+      sessionStorage.setItem('pgss_admin_verified_825098', 'true');
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#0047AB', '#F59E0B', '#FFFFFF']
+      });
+      return true;
+    }
+    return false;
+  };
+
+  const exitAdminMode = () => {
+    const studentUser = users.find((u) => u.role === 'student') || INITIAL_USERS[1];
+    setCurrentUser(studentUser);
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(studentUser));
+    sessionStorage.removeItem('pgss_admin_verified_825098');
+  };
+
   const loginUser = (userId: string) => {
     const found = users.find((u) => u.id === userId);
     if (found) {
+      if (found.role === 'curator_admin') {
+        sessionStorage.setItem('pgss_admin_verified_825098', 'true');
+      }
       setCurrentUser(found);
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(found));
     }
   };
 
-  const loginWithEmailOrId = (identifier: string): boolean => {
+  const loginWithEmailOrId = (identifier: string, passcode?: string): { success: boolean; requireAdminPasscode?: boolean; message?: string } => {
     const clean = identifier.trim().toLowerCase();
     const found = users.find(
       (u) => 
@@ -676,23 +722,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         u.name.toLowerCase() === clean ||
         u.id.toLowerCase() === clean
     );
-    if (found) {
-      setCurrentUser(found);
-      confetti({
-        particleCount: 35,
-        spread: 50,
-        origin: { y: 0.6 },
-        colors: ['#0047AB', '#38BDF8', '#FFFFFF']
-      });
-      return true;
+    if (!found) {
+      return { success: false, message: '未找到匹配的社员账号，请核对学号或注册邮箱。' };
     }
-    return false;
+
+    // Strict Admin Protection: Any admin role account requires password 825098
+    if (found.role === 'curator_admin') {
+      if (!passcode || passcode.trim() !== ADMIN_PASSCODE) {
+        return { 
+          success: false, 
+          requireAdminPasscode: true, 
+          message: '检测到社长/管理员账号。此账号受权限保护，请输入管理密码 (825098)。' 
+        };
+      }
+      sessionStorage.setItem('pgss_admin_verified_825098', 'true');
+    }
+
+    setCurrentUser(found);
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(found));
+    confetti({
+      particleCount: 35,
+      spread: 50,
+      origin: { y: 0.6 },
+      colors: ['#0047AB', '#38BDF8', '#FFFFFF']
+    });
+    return { success: true };
   };
 
   const logoutUser = () => {
-    // Switch to a guest profile or fallback to initial template
-    const defaultUser = users[0] || INITIAL_USERS[0];
+    // Switch back to default student profile and clear admin session
+    const defaultUser = users.find((u) => u.role === 'student') || INITIAL_USERS[1];
     setCurrentUser(defaultUser);
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(defaultUser));
+    sessionStorage.removeItem('pgss_admin_verified_825098');
   };
 
   const registerUser = (userData: Omit<UserProfile, 'id' | 'joinedDate' | 'submittedPhotoCount' | 'approvedPhotoCount'>): UserProfile => {
@@ -890,6 +952,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addNewsArticle = (articleData: Omit<NewsArticle, 'id' | 'likes'>) => {
+    if (currentUser?.role !== 'curator_admin') {
+      console.warn('Unauthorized: Only admin can publish news dispatches.');
+      return;
+    }
     const newArticle: NewsArticle = {
       ...articleData,
       id: 'news-' + Date.now().toString(36),
@@ -904,12 +970,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateNewsArticle = (id: string, updatedData: Partial<NewsArticle>) => {
+    if (currentUser?.role !== 'curator_admin') {
+      console.warn('Unauthorized: Only admin can edit news dispatches.');
+      return;
+    }
     setNewsArticles((prev) =>
       prev.map((art) => (art.id === id ? { ...art, ...updatedData } : art))
     );
   };
 
   const deleteNewsArticle = (id: string) => {
+    if (currentUser?.role !== 'curator_admin') {
+      console.warn('Unauthorized: Only admin can delete news dispatches.');
+      return;
+    }
     setNewsArticles((prev) => prev.filter((art) => art.id !== id));
   };
 
@@ -929,6 +1003,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem(STORAGE_KEYS.USERS);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
     localStorage.removeItem(STORAGE_KEYS.SUBMISSIONS);
+    sessionStorage.removeItem('pgss_admin_verified_825098');
   };
 
   return (
@@ -981,6 +1056,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginUser,
         loginWithEmailOrId,
         logoutUser,
+        isAdmin,
+        adminPasscode: ADMIN_PASSCODE,
+        verifyAndLoginAdmin,
+        exitAdminMode,
         registerUser,
         updateUserProfile,
         submitPhotoForReview,

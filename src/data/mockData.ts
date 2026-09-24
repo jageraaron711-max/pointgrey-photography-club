@@ -72,9 +72,9 @@ export const STUDENT_PROFILES: StudentPhotographerProfile[] = [
     specialtyZh: '微距超景深合成、植物霜晶微观世界与35mm传统银盐暗房冲洗',
     specialtyFr: 'Empilement de focus macro, cristaux végétaux et tirage argentique noir et blanc',
     gear: 'OM System OM-1 · M.Zuiko 90mm f/3.5 Macro IS PRO · Leica M6 (Ilford HP5 Plus)',
-    bioEn: 'Combines micro-world optical precision with authentic manual film chemistry in Room 214 safelight workshops.',
-    bioZh: '在社团214暗房安全灯下精细操作银盐显影，同时使用计算微距探秘晨露折射与植物脉络的微观奇迹。',
-    bioFr: 'Allie précision optique du nanomonde et tirage manuel sous lumière inactinique au labo 214.',
+    bioEn: 'Combines micro-world optical precision with authentic manual film chemistry in Ms Yelland\'s room safelight workshops.',
+    bioZh: '在社团暗房（Ms Yelland\'s room）安全灯下精细操作银盐显影，同时使用计算微距探秘晨露折射与植物脉络的微观奇迹。',
+    bioFr: 'Allie précision optique du nanomonde et tirage manuel sous lumière inactinique au labo Ms Yelland.',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
   },
   {
@@ -642,9 +642,9 @@ export const INITIAL_PHOTOS: PhotoItem[] = [
   },
   {
     id: 'photo-amber-02',
-    title: 'Analog Chemistry: Room 214 Safelight Exposure',
-    titleZh: '暗房显影的微光化学：Room 214 胶片实验',
-    titleFr: 'Chimie Argentique : Salle 214 sous Lumière Inactinique',
+    title: 'Analog Chemistry: Darkroom Safelight Exposure',
+    titleZh: '暗房显影的微光化学：胶片手工冲洗实验',
+    titleFr: 'Chimie Argentique : Labo sous Lumière Inactinique',
     author: 'Amber Hao',
     authorGrade: 'Grade 11',
     year: '2026',
@@ -657,11 +657,11 @@ export const INITIAL_PHOTOS: PhotoItem[] = [
       aperture: 'f/2.0',
       shutterSpeed: '1/15s',
       iso: '400 (Push to 1600 in D-76)',
-      location: 'PGSS Darkroom Lab (Room 214)',
+      location: 'PGSS Darkroom Lab (Ms Yelland\'s room)',
       date: '2026-04-28',
     },
     description: 'Captured under the amber safelight during a club film development workshop. Silver halide crystals emerging on fiber-based paper.',
-    descriptionZh: '社团暗房214室在琥珀色安全灯下的胶片显影瞬间。展现银盐晶体在定影盘中缓缓浮现的经典摄影温度。',
+    descriptionZh: '社团暗房在琥珀色安全灯下的胶片显影瞬间。展现银盐晶体在定影盘中缓缓浮现的经典摄影温度。',
     descriptionFr: 'Prise sous la lumière inactinique ambrée lors d’un atelier argentique du club. Émergence des cristaux d’argent.',
     likes: 156,
     featured: true,
@@ -985,9 +985,9 @@ export const INITIAL_EVENTS: ClubEvent[] = [
     category: 'darkroom',
     date: '2026-09-19',
     time: '15:15 - 17:45',
-    location: 'PGSS Room 214 (Analog Darkroom Lab)',
-    locationZh: 'Point Grey 中学 214教室（传统暗房实验室）',
-    locationFr: 'Lycée Point Grey Salle 214 (Labo Chambre Noire)',
+    location: 'Ms Yelland\'s room (Analog Darkroom Lab)',
+    locationZh: 'Point Grey 中学 Ms Yelland\'s room（暗房实验室）',
+    locationFr: 'Lycée Point Grey Salle Ms Yelland (Labo Chambre Noire)',
     status: 'upcoming',
     coverImage: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
     description: 'Hands-on session learning 35mm film loading into Paterson tanks, D-76 chemical mixing, stop bath timing, rapid fixer cycles, and optical enlarger printing.',
@@ -1112,9 +1112,9 @@ export const INITIAL_EVENTS: ClubEvent[] = [
     category: 'workshop',
     date: '2026-10-03',
     time: '15:15 - 16:45',
-    location: 'PGSS Computer Media Lab 108',
-    locationZh: 'Point Grey 中学 108 多媒体机房',
-    locationFr: 'Lycée Point Grey Salle Informatique 108',
+    location: 'Ms Yelland\'s room',
+    locationZh: 'Point Grey 中学 Ms Yelland\'s room 摄影教室',
+    locationFr: 'Lycée Point Grey Salle Ms Yelland',
     status: 'upcoming',
     coverImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
     description: 'Master tone curves, HSL sliders, mask feathering, color calibration profiles, and crafting cohesive thematic series for college portfolio admissions.',
@@ -1181,9 +1181,9 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     titleFr: 'Réservations du Matériel Photo pour la Rentrée 2026-2027 Ouvertes',
     date: '2026-09-01',
     category: 'equipment',
-    content: 'All registered PGSS Photo Club members in good standing can now sign out Sony FX30 bodies, Godox strobe lighting kits, and carbon-fiber tripods from Room 214 for school project assignments.',
-    contentZh: '所有已注册社员即日起可在214暗房教室预约借用社团公用器材，包括索尼无反机身、神牛专业外拍灯套装及碳纤维三脚架，用于校级摄影项目创作。',
-    contentFr: 'Tous les membres inscrits du club photo PGSS peuvent désormais emprunter en salle 214 des boîtiers Sony FX30, des kits de flashs Godox et des trépieds carbone pour leurs projets scolaires.',
+    content: 'All registered PGSS Photo Club members in good standing can now sign out Sony FX30 bodies, Godox strobe lighting kits, and carbon-fiber tripods from Ms Yelland\'s room for school project assignments.',
+    contentZh: '所有已注册社员即日起可在 Ms Yelland\'s room 预约借用社团公用器材，包括索尼无反机身、神牛专业外拍灯套装及碳纤维三脚架，用于校级摄影项目创作。',
+    contentFr: 'Tous les membres inscrits du club photo PGSS peuvent désormais emprunter en salle Ms Yelland des boîtiers Sony FX30, des kits de flashs Godox et des trépieds carbone pour leurs projets scolaires.',
     author: 'Lucas Vance (Tech Equipment Lead)',
     isImportant: true,
   },
@@ -1208,7 +1208,7 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     date: '2026-08-25',
     category: 'general',
     content: 'Fresh Kodak D-76 and Ilford Rapid Fixer batches mixed. 50 rolls of Ilford HP5+ 35mm film subsidised by PAC are available for student purchase at $7 CAD each.',
-    contentZh: '214暗房已完成显影与定影药水新鲜配比。由家长委员会（PAC）赞助的50卷伊尔福HP5+黑白胶卷已到货，社员享受7加元/卷优惠购入价。',
+    contentZh: '暗房实验室（Ms Yelland\'s room）已完成显影与定影药水新鲜配比。由家长委员会（PAC）赞助的50卷伊尔福HP5+黑白胶卷已到货，社员享受7加元/卷优惠购入价。',
     contentFr: 'Nouveaux bains de Kodak D-76 et fixateur Ilford préparés. 50 rouleaux de film Ilford HP5+ 35mm subventionnés par le PAC sont disponibles pour les élèves à 7 $ CAD l’unité.',
     author: 'Aria Takahashi',
     isImportant: false,
@@ -1333,8 +1333,8 @@ export const INITIAL_NEWS_ARTICLES: NewsArticle[] = [
       },
       {
         url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80',
-        caption: 'Silver halide B&W prints developed in Room 214 Darkroom',
-        captionZh: '214暗房手工显影黑白银盐原作展区，特邀指导老师现场点评',
+        caption: 'Silver halide B&W prints developed in the Darkroom (Ms Yelland\'s room)',
+        captionZh: '手工显影黑白银盐原作展区（Ms Yelland\'s room），特邀指导老师现场点评',
         exif: 'Leica M6 · Summicron 35mm f/2 · Ilford HP5 Plus 400'
       },
       {
@@ -1352,8 +1352,8 @@ The Point Grey Secondary School Photo Club officially opened its landmark **2026
 
 ### 🏛️ Three Core Curatorial Sections
 
-1. **Heritage Darkroom Works (Room 214)**: Silver halide gelatin prints manually enlarged and developed on Ilford Multigrade FB paper by senior club members.
-2. **Pacific Northwest Natural Landscapes**: Ultra-high-resolution panoramic studies of Jericho Beach, Spanish Banks, and Lighthouse Park.
+1. **Heritage Darkroom Craftsmanship (Ms Yelland's room)**: Silver halide gelatin prints manually enlarged and developed on Ilford Multigrade FB paper by senior club members.
+2. **Pacific Northwest Coast Studies**: Ultra-high-resolution panoramic studies of Jericho Beach, Spanish Banks, and Lighthouse Park.
 3. **Varsity Athletics & Sideline Energy**: High-shutter freezes from Point Grey Hounds soccer, rugby, and track & field competitions.
 
 ![Darkroom Silver Halide Craft](https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80)
@@ -1367,8 +1367,8 @@ The exhibition is open daily to students, faculty, and visiting parents from 8:3
 
 ### 🏛️ 三大核心策展单元
 
-1. **214 传统暗房银盐原作展区**：展示社员在学校 214 暗房内手工显影、定影并放大的黑白银盐作品，质感温润细腻，再现传统暗房的光影仪式感。
-2. **卑诗海岸与自然风光专题**：深入杰里科海滩（Jericho Beach）、西班牙海滩（Spanish Banks）以及灯塔公园，用镜头捕捉晨昏光影与落基山余脉的静谧。
+1. **传统暗房银盐原作展区（Ms Yelland's room）**：展示社员在学校暗房教室手工显影、定影并放大的黑白银盐作品，质感温润细腻，再现传统暗房的光影仪式感。
+2. **卑诗海岸风貌专题**：深入杰里科海滩（Jericho Beach）、西班牙海滩（Spanish Banks）以及灯塔公园，用镜头捕捉晨昏光影与落基山余脉的静谧。
 3. **校园体育与边线纪实**：定格 Point Grey 猎犬（Point Grey Hounds）校队在绿茵场、橄榄球场与硬木球馆中的热血瞬间。
 
 ![传统暗房银盐工艺展区](https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80)
@@ -1377,12 +1377,12 @@ The exhibition is open daily to students, faculty, and visiting parents from 8:3
   },
   {
     id: 'news-05',
-    title: 'Room 214 Darkroom Facility Upgrade: New Enlarger Calibrations & Ilford Paper Supply',
-    titleZh: '214号传统暗房实验室全面调试完毕：全新银盐放大机投入使用与秋季工坊开放',
-    titleFr: 'Modernisation du Labo Chambre Noire 214 : Nouveaux Agrandisseurs et Papier Ilford',
-    summary: 'The analog chemistry facility in Room 214 has received newly calibrated condenser heads and fresh chemistry for student access.',
-    summaryZh: '社团暗房实验室完成全面光学校准，新增四组高精度聚焦放大机与恒温冲洗槽，秋季暗房黑白胶片显影体验课即日起接受社员预约。',
-    summaryFr: 'Le laboratoire de chimie argentique de la salle 214 est désormais prêt pour les ateliers d’automne.',
+    title: 'Darkroom Studio Facility Upgrade: New Enlarger Calibrations & Ilford Paper Supply',
+    titleZh: '暗房实验室全面调试完毕：全新银盐放大机投入使用与秋季工坊开放（Ms Yelland\'s room）',
+    titleFr: 'Modernisation du Labo Chambre Noire : Nouveaux Agrandisseurs et Papier Ilford',
+    summary: 'The analog chemistry facility in Ms Yelland\'s room has received newly calibrated condenser heads and fresh chemistry for student access.',
+    summaryZh: '社团暗房实验室完成全面光学校准，新增四组高精度聚焦放大机与恒温冲洗槽，秋季暗房黑白胶片显影体验课即日起在 Ms Yelland\'s room 接受社员预约。',
+    summaryFr: 'Le laboratoire de chimie argentique de la salle Ms Yelland est désormais prêt pour les ateliers d’automne.',
     category: 'gear',
     date: '2026-08-01',
     readTime: '2 min read',
@@ -1390,11 +1390,11 @@ The exhibition is open daily to students, faculty, and visiting parents from 8:3
     authorGrade: 'Grade 11',
     authorRole: 'Optical & Darkroom Lead',
     coverImage: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1600&q=85',
-    tags: ['Darkroom', 'AnalogFilm', 'Ilford', 'Craftsmanship', 'Room214'],
+    tags: ['Darkroom', 'AnalogFilm', 'Ilford', 'Craftsmanship', 'MsYellandsRoom'],
     likes: 87,
     featured: false,
-    content: `Following intensive maintenance over the summer, Room 214 darkroom is fully operational with four calibrated enlargers and dedicated chemistry stations for B&W developing.`,
-    contentZh: `经过暑期的深度维护与光轴调校，214 暗房实验室现已装备完善。四组高精显影放大机、无尘干燥箱及恒温显影定影药液槽均已完成安全质检，社员可即刻预约使用。`,
+    content: `Following intensive maintenance over the summer, the darkroom in Ms Yelland's room is fully operational with four calibrated enlargers and dedicated chemistry stations for B&W developing.`,
+    contentZh: `经过暑期的深度维护与光轴调校，Ms Yelland's room 暗房实验室现已装备完善。四组高精显影放大机、无尘干燥箱及恒温显影定影药液槽均已完成安全质检，社员可即刻预约使用。`,
   },
   {
     id: 'news-point-grey-kitsilano-bowl-preview',
@@ -2764,7 +2764,7 @@ export const INITIAL_TUTORIAL_LESSONS: TutorialLesson[] = [
         why: '即使球场有照明，由于要求 1/2000s 超短曝光，必须推高 ISO 至第二原生档位获取正确曝光。'
       },
       {
-        scenario: 'Point Grey 214 暗房内操作抓拍',
+        scenario: 'Point Grey 暗房（Ms Yelland\'s room）内操作抓拍',
         recommendedSettings: 'ISO 6400 · 1/125s · f/1.4',
         why: '暗房仅有微弱红色安全灯，超大光圈搭配高 ISO 记录胶片冲印匠人专注神态。'
       }

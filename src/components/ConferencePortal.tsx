@@ -543,11 +543,11 @@ export const ConferencePortal: React.FC<ConferencePortalProps> = ({ onOpenStuden
                     </li>
                     <li className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
                       <span>{lang === 'zh' ? '胶片暗房实操' : 'Analog Darkroom Lab'}</span>
-                      <span className="text-slate-500">Room 214</span>
+                      <span className="text-slate-500">Ms Yelland's room</span>
                     </li>
                     <li className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
-                      <span>{lang === 'zh' ? '数码机房与后期' : 'Digital Post & Media Lab'}</span>
-                      <span className="text-slate-500">Room 108</span>
+                      <span>{lang === 'zh' ? '数码摄影与后期' : 'Digital Post & Imaging'}</span>
+                      <span className="text-slate-500">Ms Yelland's room</span>
                     </li>
                     <li className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
                       <span>{lang === 'zh' ? '作品展廊' : 'Gallery & Exhibition Walk'}</span>

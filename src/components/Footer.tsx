@@ -429,8 +429,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBrandKit }) => {
 
             <p className="text-zinc-400 leading-relaxed text-xs font-light">
               {lang === 'zh'
-                ? '以 Point Grey 灵犬的敏锐与速度，践行影视飓风“无限进步”的青年探索精神。致力于积极向上的公益拍摄、体育赛事、人像肖像、温哥华风光与校园活动纪实，用镜头记录生活温度，每一帧都追求极致。'
-                : 'Combining the velocity of the Point Grey Hound with the "Infinite Progress" filmmaking spirit. Dedicated to community creative, dynamic sports, portraiture, BC landscapes, and vibrant campus events.'}
+                ? '以 Point Grey 灵犬的敏锐与速度，践行影视飓风“无限进步”的青年探索精神。致力于积极向上的公益拍摄与校园活动纪实，用镜头记录生活温度，每一帧都追求极致。'
+                : 'Combining the velocity of the Point Grey Hound with the "Infinite Progress" filmmaking spirit. Dedicated to community creative and vibrant campus events.'}
             </p>
 
             <div className="flex items-center space-x-3 text-zinc-400 text-xs font-mono pt-1">

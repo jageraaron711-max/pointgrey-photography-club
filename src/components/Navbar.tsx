@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  User, Shield, Menu, X, Sparkles
+  User, Shield, Menu, X, Sparkles, LogOut
 } from 'lucide-react';
 import { ClubLogo } from './ClubLogo';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,7 +13,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCurator, onOpenStudentPortal, onOpenBrandKit }) => {
-  const { lang, setLang, currentUser } = useApp();
+  const { lang, setLang, currentUser, exitAdminMode } = useApp();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentTimeYVR, setCurrentTimeYVR] = useState('');
@@ -173,14 +173,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCurator, onOpenStudentPort
 
           {/* Member / Creator Portal CTA Button or Admin badge */}
           {currentUser.role === 'curator_admin' ? (
-            <button
-              onClick={onOpenCurator}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-mono font-bold transition-all shadow-xs cursor-pointer border border-amber-400"
-              title={lang === 'zh' ? '管理后台 · 审批社员作品申请' : 'Admin Curator Studio'}
-            >
-              <span>👑</span>
-              <span>{lang === 'zh' ? '管理后台 (Aaron)' : 'ADMIN DESK'}</span>
-            </button>
+            <div className="flex items-center space-x-1.5">
+              <button
+                onClick={onOpenCurator}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-mono font-bold transition-all shadow-xs cursor-pointer border border-amber-400"
+                title={lang === 'zh' ? '管理后台 · 审批社员作品申请' : 'Admin Curator Studio'}
+              >
+                <span>👑</span>
+                <span>{lang === 'zh' ? '管理后台 (Admin)' : 'ADMIN DESK'}</span>
+              </button>
+              <button
+                onClick={() => {
+                  exitAdminMode();
+                }}
+                className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-500 text-xs font-mono transition-colors cursor-pointer border border-slate-200 flex items-center space-x-1"
+                title={lang === 'zh' ? '退出管理员模式（切回学生视图）' : 'Exit Admin Mode (Switch to Student View)'}
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline text-[11px]">{lang === 'zh' ? '退出管理' : 'Exit'}</span>
+              </button>
+            </div>
           ) : (
             <>
               <button
@@ -197,7 +209,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCurator, onOpenStudentPort
               {/* Curator Control Icon */}
               <button
                 onClick={onOpenCurator}
-                title={lang === 'zh' ? '管理后台入口 (仅限管理者)' : 'Admin Curator Portal'}
+                title={lang === 'zh' ? '管理后台入口 (仅限管理者，密码: 825098)' : 'Admin Curator Portal (Passcode: 825098)'}
                 className="p-1.5 rounded text-slate-500 hover:text-[#0047AB] hover:bg-blue-50 transition-colors cursor-pointer flex items-center space-x-1 text-xs font-mono"
               >
                 <Shield className="w-4 h-4 text-slate-500" />
