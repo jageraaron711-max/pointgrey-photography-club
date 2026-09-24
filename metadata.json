@@ -1,0 +1,6 @@
+{
+  "name": "Point Grey Secondary Photography Club",
+  "description": "Responsive landing page, conference portal, and digital exhibition platform for the Point Grey Secondary School Photography Club.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
